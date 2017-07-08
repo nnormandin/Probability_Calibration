@@ -55,7 +55,7 @@ the calibration process is a separate mapping such that
 
 $$g: s_i \mapsto P(c_i | s_i)$$
 
-**it's really important to note that we're fitting another model on top of our model output, where your feature matrix is just the vector of probability scores $\vec{s}$ and the target variable is the vector of true class labels $\vec{y} \in {0,1}$**
+**it's really important to note that we're fitting another model on top of our model output, where your feature matrix is just the vector of probability scores $\vec{s}$ and the target variable is the vector of true class labels $\vec{y} \in \{0,1\}$**
 
 # Motivation
 
