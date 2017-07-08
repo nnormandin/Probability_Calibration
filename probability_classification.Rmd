@@ -1,0 +1,202 @@
+---
+title: "Calibration for probabilistic classification"
+subtitle: "Nick"
+output: 
+  beamer_presentation: 
+    #latex_engine: xelatex
+    colortheme: seahorse
+    keep_tex: yes
+    theme: Dresden
+    slide_level: 2
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{pgfplots}
+---
+
+```{r setup, include=FALSE}
+#library(emo)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# Overview
+
+## The problem
+
+- some classifiers produce well-calibrated probabilities
+    + **examples:** discriminant analysis, logistic regression
+\vspace{2mm}
+- others don't
+    + **examples:** naive bayes, SVMs, anything with boosting, tree-based methods, sometimes neural networks
+
+## First of all, who cares?
+
+1. people with asymmetric misclassification costs
+2. people who are going to use the scores in post-processing
+3. people who want to compare model outputs on a fair basis
+
+## Definitions: "classification"
+
+in general, a classifier is a mapping function $f$ such that 
+
+$$f: \vec{x} \mapsto c$$ 
+
+where $\vec{x} \in \mathbb{R}^{P}$, but we're mostly interested in the intermediate step in where the function produces some membership score $s_i$ for each instance $\vec{x}_i$
+
+## Definitions: "well-calibrated"
+
+- for a model $f$ and score $s_i$ to be well-calibrated for class $c_i$, the empirical probability of a correct classification $P(c_i | f( c_i | x_i)=s_i)$ must converge to $f(c_i | x_i) = s_i$
+\vspace{5mm}
+- **example**: When $s_i = 0.9$, the probability of a correct classification should converge to $P(c_i | s_i = 0.9) = 0.9$. Otherwise, this isn't \textit{really} a `probability.'
+
+## Definitions: "calibration"
+
+the calibration process is a separate mapping such that
+
+$$g: s_i \mapsto P(c_i | s_i)$$
+
+**it's really important to note that we're fitting another model on top of our model output, where your feature matrix is just the vector of probability scores $\vec{s}$ and the target variable is the vector of true class labels $\vec{y} \in {0,1}$**
+
+# Motivation
+
+# Common methods
+
+# Extensions to $k > 2$
+
+## Probabilistic classification as a simplex
+
+-  if we view the task of probabilistic classification as a vector-valued function, we can visualize the co-domain of this task as assigning the location of a prediction in a regular (unit) simplex, $\Delta^{K-1}$
+\vspace{2mm}
+- why is this hard when $K > 2$?
+
+## Probabilistic classification as a simplex
+
+\begin{figure}
+\begin{tikzpicture}
+\node [above] at (0, 1.5) {$\Delta^{1}$};
+\node [above] at (2.5, 1.5) {$\Delta^{2}$};
+%\node [below] at (0, -.25) {line segment};
+%\node [below] at (2.5, -.25) {triangle};
+
+\draw [black, thick] (0, 0) -- (0, 1);
+\draw [black, fill =black] (0, 0) circle [radius = 0.1];
+\draw [black, fill =black] (0, 1) circle [radius = 0.1];
+\draw [black, thick] (2, 0) -- (3, 0) -- (2.5, 0.87) -- (2,0);
+\draw [black, fill = black](2, 0) circle [radius = 0.1];
+\draw [black, fill = black](3, 0) circle [radius = 0.1];
+\draw [black, fill = black](2.5, 0.87) circle [radius = 0.1];
+
+\end{tikzpicture}
+\end{figure}
+
+trivial with $\Delta^{1}$ because we're only concerned with one unknown value and its complement. With $\Delta^{K>2}$ the simplex becomes a triangle, tetrahedron, five-cell, etc.
+
+## Multi-class probability estimation
+
+\begin{figure}
+\begin{tikzpicture}
+\draw [black] (-.5,-.5) rectangle (8, .5);
+\draw [blue, fill =purple] (5.5,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (0,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (.5,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (1,0) circle [radius = 0.2];
+\draw [blue, fill =red] (1.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (3,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (3.5,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (4,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (4.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7.5,0) circle [radius = 0.2];
+\end{tikzpicture}
+\caption {classification problem with $k = 4$}
+\end{figure}
+
+#### **Strategy:** decompose into separate binary classification problems
+
+- one vs. all
+- all pairs
+
+
+## One vs. all
+
+\begin{figure}
+\begin{tikzpicture}
+\draw [black] (-.5,-.5) rectangle (8, .5);
+\node [above] at (0.5, .75) {\emph{one}};
+\draw [->, thick] (0.5, .75) -- (0.5, .3);
+
+\node [above] at (4.25, .75) {\emph{all}};
+\draw [->, thick] (4.25, .75) -- (2.25, .3);
+\draw [->, thick] (4.25, .75) -- (3.75, .3);
+\draw [->, thick] (4.25, .75) -- (6, .3);
+
+
+\draw [red, ultra thick] (-.25, -.25) rectangle (1.22, .25);
+\draw [red, ultra thick] (1.27, -.25) rectangle (7.75, .25);
+\draw [blue, fill =blue] (0,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (.5,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (1,0) circle [radius = 0.2];
+\draw [blue, fill =red] (1.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (3,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (3.5,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (4,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (4.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7.5,0) circle [radius = 0.2];
+\end{tikzpicture}
+\caption {\emph{one vs. all} reduces to $k-1$ calibrations}
+\end{figure}
+
+## All pairs
+
+\begin{figure}
+\begin{tikzpicture}
+\draw [black] (-.5,-.5) rectangle (8, .5);
+\node [above] at (0.5, .75) {$k_i$};
+\draw [->, thick] (0.5, .75) -- (0.5, .3);
+
+\node [above] at (2.25, .75) {$k_j$};
+\draw [->, thick] (2.25, .75) -- (2.25, .3);
+
+\draw [red, ultra thick] (-.25, -.25) rectangle (1.22, .25);
+\draw [red, ultra thick] (1.27, -.25) rectangle (3.25, .25);
+\draw [blue, fill =blue] (0,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (.5,0) circle [radius = 0.2];
+\draw [blue, fill =blue] (1,0) circle [radius = 0.2];
+\draw [blue, fill =red] (1.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2,0) circle [radius = 0.2];
+\draw [blue, fill =red] (2.5,0) circle [radius = 0.2];
+\draw [blue, fill =red] (3,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (3.5,0) circle [radius = 0.2];
+\draw [blue, fill =orange] (4,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (4.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (5.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (6.5,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7,0) circle [radius = 0.2];
+\draw [blue, fill =purple] (7.5,0) circle [radius = 0.2];
+\end{tikzpicture}
+\caption {\emph{all pairs} reduces to ${K}\choose{2}$ calibrations}
+\end{figure}
+
+## Combining multi-class probability estimates
+
+# Experimental results
+
+# Conclusion
+
+## References
+
