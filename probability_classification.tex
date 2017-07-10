@@ -506,9 +506,61 @@ classification problems}
 
 \begin{frame}{Combining multi-class probability estimates}
 
+\begin{itemize}
+\tightlist
+\item
+  least squares: minimize squared error loss w/ non-negativity
+  \vspace{2mm}
+\item
+  coupling (only \emph{all pairs}): minimize log loss w/ non-negativity
+  \vspace{2mm}
+\item
+  normalization (only \emph{one vs all}): divide by sum of probabilities
+  estimates
+\end{itemize}
+
 \end{frame}
 
 \section{Experimental results}\label{experimental-results}
+
+\begin{frame}{effect of calibration set size}
+
+\footnotesize
+from Niculescu-Mizil and Caruana, 2005
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{./calibration_size.png}
+\caption{calibration\_size}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{effect of multi-class combination method}
+
+\footnotesize
+from Zadrozny and Elkan, 2002
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{./multiclass_combination.png}
+\caption{combination}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{boosting causes calibration issues}
+
+\footnotesize
+from Niculescu-Mizil and Caruana, 2005
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{./boosting.png}
+\caption{combination}
+\end{figure}
+
+\end{frame}
 
 \section{Conclusion}\label{conclusion}
 
@@ -516,19 +568,20 @@ classification problems}
 
 \begin{itemize}
 \item
-  \href{https://www.researchgate.net/publication/28358301_Multivariate_calibration_of_classifier_scores_into_the_probability_space}{Multivariate
-  calibration of classifier scores into the probability space} by Martin
-  Gebel
+  \textbf{\href{https://www.researchgate.net/publication/28358301_Multivariate_calibration_of_classifier_scores_into_the_probability_space}{Multivariate
+  calibration of classifier scores into the probability space}} by
+  Martin Gebel
 \item
-  \href{https://www.google.com/url?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=4\&cad=rja\&uact=8\&ved=0ahUKEwit7-7h9f7UAhVl6IMKHUPeB2oQFghDMAM\&url=http\%3A\%2F\%2Fwww.cs.cornell.edu\%2Fcourses\%2Fcs678\%2F2007sp\%2FZadroznyElkan.pdf\&usg=AFQjCNEsN8dbe1yXCm7D7qkyrP6HZ6yOxg}{Transforming
-  Classifier Scores into Accurate Multiclass Probability Estimates} by
+  \textbf{\href{https://www.google.com/url?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=4\&cad=rja\&uact=8\&ved=0ahUKEwit7-7h9f7UAhVl6IMKHUPeB2oQFghDMAM\&url=http\%3A\%2F\%2Fwww.cs.cornell.edu\%2Fcourses\%2Fcs678\%2F2007sp\%2FZadroznyElkan.pdf\&usg=AFQjCNEsN8dbe1yXCm7D7qkyrP6HZ6yOxg}{Transforming
+  Classifier Scores into Accurate Multiclass Probability Estimates}} by
   Zadrozny and Elkan
 \item
-  \href{http://www.cs.cornell.edu/~caruana/niculescu.scldbst.crc.rev4.pdf}{Obtaining
-  Calibrated Probabilities from Boosting} by Niculescu-Mizil and Caruana
+  \textbf{\href{http://www.cs.cornell.edu/~caruana/niculescu.scldbst.crc.rev4.pdf}{Obtaining
+  Calibrated Probabilities from Boosting}} by Niculescu-Mizil and
+  Caruana
 \item
-  \href{https://www.google.com/url?url=http://scholar.google.com/scholar_url\%3Furl\%3Dhttp://machinelearning.wustl.edu/mlpapers/paper_files/icml2005_Niculescu-MizilC05.pdf\%26hl\%3Den\%26sa\%3DX\%26scisig\%3DAAGBfm1wOIFZHQSONJ4oLiHQyqALiSVCng\%26nossl\%3D1\%26oi\%3Dscholarr\&rct=j\&q=\&esrc=s\&sa=X\&ved=0ahUKEwiOotzS9v7UAhXr8YMKHZI8CGsQgAMIJygAMAA\&usg=AFQjCNG3rc7DzDTTox-DD_xm9hwrC5VVQA}{Predicting
-  Good Probabilities With Supervised Learning} by Niculescu-Mizil and
+  \textbf{\href{https://www.google.com/url?url=http://scholar.google.com/scholar_url\%3Furl\%3Dhttp://machinelearning.wustl.edu/mlpapers/paper_files/icml2005_Niculescu-MizilC05.pdf\%26hl\%3Den\%26sa\%3DX\%26scisig\%3DAAGBfm1wOIFZHQSONJ4oLiHQyqALiSVCng\%26nossl\%3D1\%26oi\%3Dscholarr\&rct=j\&q=\&esrc=s\&sa=X\&ved=0ahUKEwiOotzS9v7UAhXr8YMKHZI8CGsQgAMIJygAMAA\&usg=AFQjCNG3rc7DzDTTox-DD_xm9hwrC5VVQA}{Predicting
+  Good Probabilities With Supervised Learning}} by Niculescu-Mizil and
   Caruana
 \end{itemize}
 

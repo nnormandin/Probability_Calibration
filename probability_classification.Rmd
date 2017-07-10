@@ -357,7 +357,34 @@ trivial with $\Delta^{1}$ because we're only concerned with one unknown value an
 
 ## Combining multi-class probability estimates
 
+- least squares: minimize squared error loss w/ non-negativity
+\vspace{2mm}
+- coupling (only *all pairs*): minimize log loss w/ non-negativity
+\vspace{2mm}
+- normalization (only *one vs all*): divide by sum of probabilities estimates
+
 # Experimental results
+
+## effect of calibration set size
+
+\footnotesize
+from Niculescu-Mizil and Caruana, 2005
+
+![calibration_size](./calibration_size.png)
+
+## effect of multi-class combination method
+
+\footnotesize
+from Zadrozny and Elkan, 2002
+
+![combination](./multiclass_combination.png)
+
+## boosting causes calibration issues
+
+\footnotesize
+from Niculescu-Mizil and Caruana, 2005
+
+![combination](./boosting.png)
 
 # Conclusion
 
