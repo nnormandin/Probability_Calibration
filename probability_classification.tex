@@ -72,27 +72,34 @@
 
 \begin{frame}{The problem}
 
+\begin{columns}[t]
+\begin{column}{0.48\textwidth}
+
+\begin{block}{some classifiers produce well-calibrated probabilities}
+
 \begin{itemize}
-\tightlist
-\item
-  some classifiers produce well-calibrated probabilities
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \textbf{examples:} discriminant analysis, logistic regression
-    \vspace{2mm}
-  \end{itemize}
-\item
-  others don't
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \textbf{examples:} naive bayes, SVMs, anything with boosting,
-    tree-based methods, sometimes neural networks
-  \end{itemize}
+\item discriminant analysis
+\item logistic regression
 \end{itemize}
+
+\end{block}
+\end{column}
+
+
+\begin{column}{0.48\textwidth}
+\begin{block}{others don't}
+\vspace{3mm}
+\begin{itemize}
+\item naive bayes
+\item SVMs
+\item anything with boosting
+\item tree methods
+\item sometimes neural networks
+\end{itemize}
+\end{block}
+
+\end{column}
+\end{columns}
 
 \end{frame}
 
@@ -102,9 +109,9 @@
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  people with asymmetric misclassification costs
+  people with asymmetric misclassification costs \vspace{2mm}
 \item
-  people who are going to use the scores in post-processing
+  people who are going to use the scores in post-processing \vspace{2mm}
 \item
   people who want to compare model outputs on a fair basis
 \end{enumerate}
@@ -133,7 +140,7 @@ intermediate step in where the function produces some membership score
   \(P(c_i | f( c_i | x_i)=s_i)\) must converge to \(f(c_i | x_i) = s_i\)
   \vspace{5mm}
 \item
-  \textbf{example}: When \(s_i = 0.9\), the probability of a correct
+  \textbf{example}: when \(s_i = 0.9\), the probability of a correct
   classification should converge to \(P(c_i | s_i = 0.9) = 0.9\).
   Otherwise, this isn't \textit{really} a `probability.'
 \end{itemize}
@@ -153,9 +160,29 @@ of true class labels \(\vec{y} \in \{0,1\}\)}
 
 \end{frame}
 
-\section{Motivation}\label{motivation}
-
 \section{Common methods}\label{common-methods}
+
+\begin{frame}{Platt scaling}
+
+Pass \(s_i\) through the sigmoid
+
+\[P(c_i | s_i) = \frac{1}{1 + \exp(As_i + B)}\]
+
+where \(A\) and \(B\) are the solution to
+\[\underset{A, B}{\operatorname{argmax}} - \sum\limits_{i} y_i \log(p_i) + (1 - y_i) \log(1- p_i)\]
+
+\end{frame}
+
+\begin{frame}{Isotonic regression}
+
+A strictly-nondecreasing piecewise linear function \(m\), where
+\[y_i = m(s_i) + \epsilon\]
+
+fit such that
+
+\[\hat{m} = {argmin}_z \sum_i{y_i-z(s_i) ^2}\]
+
+\end{frame}
 
 \section{\texorpdfstring{Extensions to
 \(k > 2\)}{Extensions to k \textgreater{} 2}}\label{extensions-to-k-2}
@@ -285,10 +312,10 @@ classification problems}
 \begin{figure}
 \begin{tikzpicture}
 \draw [black] (-.5,-.5) rectangle (8, .5);
-\node [above] at (0.5, .75) {$k_i$};
+\node [above] at (0.5, .75) {$c_i$};
 \draw [->, thick] (0.5, .75) -- (0.5, .3);
 
-\node [above] at (2.25, .75) {$k_j$};
+\node [above] at (2.25, .75) {$c_j$};
 \draw [->, thick] (2.25, .75) -- (2.25, .3);
 
 \draw [red, ultra thick] (-.25, -.25) rectangle (1.22, .25);

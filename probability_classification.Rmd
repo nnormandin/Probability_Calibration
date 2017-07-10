@@ -23,16 +23,42 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## The problem
 
-- some classifiers produce well-calibrated probabilities
-    + **examples:** discriminant analysis, logistic regression
-\vspace{2mm}
-- others don't
-    + **examples:** naive bayes, SVMs, anything with boosting, tree-based methods, sometimes neural networks
+\begin{columns}[t]
+\begin{column}{0.48\textwidth}
+
+\begin{block}{some classifiers produce well-calibrated probabilities}
+
+\begin{itemize}
+\item discriminant analysis
+\item logistic regression
+\end{itemize}
+
+\end{block}
+\end{column}
+
+
+\begin{column}{0.48\textwidth}
+\begin{block}{others don't}
+\vspace{3mm}
+\begin{itemize}
+\item naive bayes
+\item SVMs
+\item anything with boosting
+\item tree methods
+\item sometimes neural networks
+\end{itemize}
+\end{block}
+
+\end{column}
+\end{columns}
+
 
 ## First of all, who cares?
 
 1. people with asymmetric misclassification costs
+\vspace{2mm}
 2. people who are going to use the scores in post-processing
+\vspace{2mm}
 3. people who want to compare model outputs on a fair basis
 
 ## Definitions: "classification"
@@ -47,7 +73,7 @@ where $\vec{x} \in \mathbb{R}^{P}$, but we're mostly interested in the intermedi
 
 - for a model $f$ and score $s_i$ to be well-calibrated for class $c_i$, the empirical probability of a correct classification $P(c_i | f( c_i | x_i)=s_i)$ must converge to $f(c_i | x_i) = s_i$
 \vspace{5mm}
-- **example**: When $s_i = 0.9$, the probability of a correct classification should converge to $P(c_i | s_i = 0.9) = 0.9$. Otherwise, this isn't \textit{really} a `probability.'
+- **example**: when $s_i = 0.9$, the probability of a correct classification should converge to $P(c_i | s_i = 0.9) = 0.9$. Otherwise, this isn't \textit{really} a `probability.'
 
 ## Definitions: "calibration"
 
@@ -57,9 +83,38 @@ $$g: s_i \mapsto P(c_i | s_i)$$
 
 **it's really important to note that we're fitting another model on top of our model output, where your feature matrix is just the vector of probability scores $\vec{s}$ and the target variable is the vector of true class labels $\vec{y} \in \{0,1\}$**
 
-# Motivation
+# Visualizing calibration
+
+## Visualizing calibration
+
+## Reliability plots
+
+
 
 # Common methods
+
+## Platt scaling
+
+Pass $s_i$ through the sigmoid
+
+$$P(c_i | s_i) = \frac{1}{1 + \exp(As_i + B)}$$
+
+
+where $A$ and $B$ are the solution to
+$$\underset{A, B}{\operatorname{argmax}} - \sum\limits_{i} y_i \log(p_i) + (1 - y_i) \log(1- p_i)$$
+
+## Platt scaling
+
+
+
+## Isotonic regression
+
+A strictly-nondecreasing piecewise linear function $m$, where 
+$$y_i = m(s_i) + \epsilon$$
+
+fit such that
+
+$$\hat{m} = {argmin}_z \sum_i{y_i-z(s_i) ^2}$$
 
 # Extensions to $k > 2$
 
@@ -164,10 +219,10 @@ trivial with $\Delta^{1}$ because we're only concerned with one unknown value an
 \begin{figure}
 \begin{tikzpicture}
 \draw [black] (-.5,-.5) rectangle (8, .5);
-\node [above] at (0.5, .75) {$k_i$};
+\node [above] at (0.5, .75) {$c_i$};
 \draw [->, thick] (0.5, .75) -- (0.5, .3);
 
-\node [above] at (2.25, .75) {$k_j$};
+\node [above] at (2.25, .75) {$c_j$};
 \draw [->, thick] (2.25, .75) -- (2.25, .3);
 
 \draw [red, ultra thick] (-.25, -.25) rectangle (1.22, .25);
