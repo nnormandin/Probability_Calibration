@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 *.Rproj
+probability_classification_files/*
+probability_classification_cache/*

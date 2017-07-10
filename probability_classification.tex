@@ -28,6 +28,55 @@
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
 \newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight0.8\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 
 % Prevent slide breaks in the middle of a paragraph:
 \widowpenalties 1 10000
@@ -62,7 +111,7 @@
 \usepackage{pgfplots}
 
 \title{Calibration for probabilistic classification}
-\subtitle{Nick}
+\subtitle{Nick Normandin}
 \date{}
 
 \begin{document}
@@ -160,11 +209,55 @@ of true class labels \(\vec{y} \in \{0,1\}\)}
 
 \end{frame}
 
+\section{Visualizing calibration}\label{visualizing-calibration}
+
+\begin{frame}[fragile]{Visualizing calibration}
+
+\footnotesize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# train SVM w/ linear kernel on Pima Indian Diabetes data}
+\NormalTok{m <-}\StringTok{ }\KeywordTok{train}\NormalTok{(}\DataTypeTok{x =} \NormalTok{PimaIndiansDiabetes[,}\DecValTok{1}\NormalTok{:}\DecValTok{8}\NormalTok{],}
+           \DataTypeTok{y =} \NormalTok{PimaIndiansDiabetes[,}\DecValTok{9}\NormalTok{], }\DataTypeTok{tuneLength =} \DecValTok{1}\NormalTok{,}
+           \DataTypeTok{method =} \StringTok{'svmLinear'}\NormalTok{,}
+           \DataTypeTok{trControl =} \KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{'cv'}\NormalTok{,}
+                                    \DataTypeTok{savePredictions =} \NormalTok{T,}
+                                    \DataTypeTok{classProbs =} \NormalTok{T))}
+
+\NormalTok{pred <-}\StringTok{ }\NormalTok{m$pred[}\KeywordTok{order}\NormalTok{(m$pred$rowIndex),]}
+\NormalTok{result <-}\StringTok{ }\KeywordTok{data.table}\NormalTok{(}\DataTypeTok{prob =} \NormalTok{pred$pos,}
+                     \DataTypeTok{class =} \KeywordTok{ifelse}\NormalTok{(pred$obs ==}\StringTok{ 'pos'}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}{Visualizing calibration}
+
+plotting the model class score \(s_i\) vs the true label \(y_i\). Is
+this a useful representation?
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-2-1.pdf}
+
+\end{frame}
+
+\begin{frame}{Reliability plots}
+
+\textbf{(1)} Bin predictions by \(s_i\) (x-axis), \textbf{(2)} calculate
+\(p(c_i)\) by bin (y-axis)
+
+\footnotesize
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-3-1.pdf}
+
+\end{frame}
+
 \section{Common methods}\label{common-methods}
 
 \begin{frame}{Platt scaling}
 
-Pass \(s_i\) through the sigmoid
+pass \(s_i\) through the sigmoid
 
 \[P(c_i | s_i) = \frac{1}{1 + \exp(As_i + B)}\]
 
@@ -173,14 +266,83 @@ where \(A\) and \(B\) are the solution to
 
 \end{frame}
 
+\begin{frame}{Platt scaling}
+
+applied to the Pima Indian Diabetes scores
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-4-1.pdf}
+
+\end{frame}
+
 \begin{frame}{Isotonic regression}
 
-A strictly-nondecreasing piecewise linear function \(m\), where
+a strictly-nondecreasing piecewise linear function \(m\), where
 \[y_i = m(s_i) + \epsilon\]
 
 fit such that
 
-\[\hat{m} = {argmin}_z \sum_i{y_i-z(s_i) ^2}\]
+\[\hat{m} = {argmin}_z \sum_i{(y_i-z(s_i)) ^2}\]
+
+\end{frame}
+
+\begin{frame}{Isotonic regression}
+
+linear and isotonic regression fit to random noise with drift
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-6-1.pdf}
+
+\end{frame}
+
+\begin{frame}{Isotonic regression}
+
+applied to the Pima Indian Diabetes scores
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-7-1.pdf}
+
+\end{frame}
+
+\begin{frame}{Notes on applying calibration}
+
+\begin{itemize}
+\tightlist
+\item
+  it's really easy to overfit
+
+  \begin{itemize}
+  \tightlist
+  \item
+    calibration partition
+  \item
+    cross-validation
+  \end{itemize}
+\end{itemize}
+
+\vspace{1mm}
+
+\begin{itemize}
+\tightlist
+\item
+  isotonic regression is generally more flexible (and can closely
+  approximate sigmoid)
+\end{itemize}
+
+\vspace{1mm}
+
+\begin{itemize}
+\tightlist
+\item
+  best technique is dependent on the family of model used to generate
+  \(s_i\)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Bootstrap aggregated isotonic regression}
+
+make it smoother by aggregating and averaging over 1000 resampled
+isotonic regression fits
+
+\includegraphics{probability_classification_files/figure-beamer/unnamed-chunk-8-1.pdf}
 
 \end{frame}
 
@@ -351,6 +513,24 @@ classification problems}
 \section{Conclusion}\label{conclusion}
 
 \begin{frame}{References}
+
+\begin{itemize}
+\item
+  \href{https://www.researchgate.net/publication/28358301_Multivariate_calibration_of_classifier_scores_into_the_probability_space}{Multivariate
+  calibration of classifier scores into the probability space} by Martin
+  Gebel
+\item
+  \href{https://www.google.com/url?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=4\&cad=rja\&uact=8\&ved=0ahUKEwit7-7h9f7UAhVl6IMKHUPeB2oQFghDMAM\&url=http\%3A\%2F\%2Fwww.cs.cornell.edu\%2Fcourses\%2Fcs678\%2F2007sp\%2FZadroznyElkan.pdf\&usg=AFQjCNEsN8dbe1yXCm7D7qkyrP6HZ6yOxg}{Transforming
+  Classifier Scores into Accurate Multiclass Probability Estimates} by
+  Zadrozny and Elkan
+\item
+  \href{http://www.cs.cornell.edu/~caruana/niculescu.scldbst.crc.rev4.pdf}{Obtaining
+  Calibrated Probabilities from Boosting} by Niculescu-Mizil and Caruana
+\item
+  \href{https://www.google.com/url?url=http://scholar.google.com/scholar_url\%3Furl\%3Dhttp://machinelearning.wustl.edu/mlpapers/paper_files/icml2005_Niculescu-MizilC05.pdf\%26hl\%3Den\%26sa\%3DX\%26scisig\%3DAAGBfm1wOIFZHQSONJ4oLiHQyqALiSVCng\%26nossl\%3D1\%26oi\%3Dscholarr\&rct=j\&q=\&esrc=s\&sa=X\&ved=0ahUKEwiOotzS9v7UAhXr8YMKHZI8CGsQgAMIJygAMAA\&usg=AFQjCNG3rc7DzDTTox-DD_xm9hwrC5VVQA}{Predicting
+  Good Probabilities With Supervised Learning} by Niculescu-Mizil and
+  Caruana
+\end{itemize}
 
 \end{frame}
 

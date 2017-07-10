@@ -1,6 +1,6 @@
 ---
 title: "Calibration for probabilistic classification"
-subtitle: "Nick"
+subtitle: "Nick Normandin"
 output: 
   beamer_presentation: 
     #latex_engine: xelatex
@@ -14,8 +14,8 @@ header-includes:
 ---
 
 ```{r setup, include=FALSE}
-#library(emo)
 knitr::opts_chunk$set(echo = FALSE)
+source('./utils.R')
 ```
 
 
@@ -87,15 +87,47 @@ $$g: s_i \mapsto P(c_i | s_i)$$
 
 ## Visualizing calibration
 
+\footnotesize
+```{r, echo = TRUE, message=FALSE, warning=FALSE, cache = TRUE}
+# train SVM w/ linear kernel on Pima Indian Diabetes data
+m <- train(x = PimaIndiansDiabetes[,1:8],
+           y = PimaIndiansDiabetes[,9], tuneLength = 1,
+           method = 'svmLinear',
+           trControl = trainControl(method = 'cv',
+                                    savePredictions = T,
+                                    classProbs = T))
+
+pred <- m$pred[order(m$pred$rowIndex),]
+result <- data.table(prob = pred$pos,
+                     class = ifelse(pred$obs == 'pos', 1, 0))
+
+```
+
+## Visualizing calibration
+
+plotting the model class score $s_i$ vs the true label $y_i$. Is this a useful representation?
+
+```{r, cache = TRUE}
+plot(x = result$prob, y = result$class, pch = '|',
+     xlab = 'p(y = 1)', ylab = '', bty = 'n', yaxt = 'n')
+```
+
+
 ## Reliability plots
 
+**(1)** Bin predictions by $s_i$ (x-axis), **(2)** calculate $p(c_i)$ by bin (y-axis)
 
+\footnotesize
+
+```{r, cache = TRUE}
+ReliabilityPlot(result$class, result$prob, bins = 10)
+```
 
 # Common methods
 
 ## Platt scaling
 
-Pass $s_i$ through the sigmoid
+pass $s_i$ through the sigmoid
 
 $$P(c_i | s_i) = \frac{1}{1 + \exp(As_i + B)}$$
 
@@ -105,16 +137,92 @@ $$\underset{A, B}{\operatorname{argmax}} - \sum\limits_{i} y_i \log(p_i) + (1 - 
 
 ## Platt scaling
 
+applied to the Pima Indian Diabetes scores
 
+```{r, cache = TRUE}
+
+pmod <- train(x = result[,1], y = ifelse(result$class == 1, 'y', 'n'), family = 'binomial',
+           method = 'glm', trControl = trainControl(method = 'cv',
+                                                   savePredictions = TRUE,
+                                                   classProbs = TRUE))
+
+result[, platt_probs := pmod$pred[order(pmod$pred$rowIndex),4]]
+
+plot(x = result$prob, y = result$class, pch = '|',
+     xlab = 'p(y = 1)', ylab = '', bty = 'n', yaxt = 'n')
+
+lines(y = sort(result$platt_probs), x = sort(result$prob), lwd = 4, col = 'red')
+```
 
 ## Isotonic regression
 
-A strictly-nondecreasing piecewise linear function $m$, where 
+a strictly-nondecreasing piecewise linear function $m$, where 
 $$y_i = m(s_i) + \epsilon$$
 
 fit such that
 
-$$\hat{m} = {argmin}_z \sum_i{y_i-z(s_i) ^2}$$
+$$\hat{m} = {argmin}_z \sum_i{(y_i-z(s_i)) ^2}$$
+
+## Isotonic regression
+
+linear and isotonic regression fit to random noise with drift
+
+```{r, cache = TRUE}
+# noise with drift
+x <- seq(200)
+y <- seq(200) + rnorm(200, 0, 30)
+#plot(x, y, bty = 'n', yaxt = 'n', xaxt = 'n', ylab = '', xlab = '')
+```
+
+```{r, cache = TRUE}
+# fit with isotonic regression vs linear regression
+plot(x, y, bty = 'n', yaxt = 'n', xaxt = 'n', ylab = '', xlab = '')
+lines(isoreg(x,y), lwd = 4)
+tmp <- lm(y ~ x)$coefficients
+abline(a= tmp[1], b = tmp[2], lwd = 4, col = 'blue')
+```
+
+## Isotonic regression
+
+applied to the Pima Indian Diabetes scores
+
+```{r}
+plot(x = result$prob, y = result$class, pch = '|',
+     xlab = 'p(y = 1)', ylab = '', bty = 'n', yaxt = 'n')
+
+lines(isoreg(result$prob, result$class), lwd = 4, col = 'red')
+
+```
+
+## Notes on applying calibration
+
+- it's really easy to overfit
+    + calibration partition
+    + cross-validation
+
+\vspace{1mm}
+
+- isotonic regression is generally more flexible (and can closely approximate sigmoid)
+
+\vspace{1mm}
+
+- best technique is dependent on the family of model used to generate $s_i$
+
+## Bootstrap aggregated isotonic regression
+
+make it smoother by aggregating and averaging over 1000 resampled isotonic regression fits
+
+```{r, cache = TRUE}
+iso_mods1000 <- bootstrap_iso(result$prob, result$class, NBOOT = 10000, SAMP = 0.3)
+iso_mods1 <- bootstrap_iso(result$prob, result$class, NBOOT = 1, SAMP = 1)
+
+iso_pred <- predict_bootiso(iso_mods1000, result$prob)
+
+plot(predict_bootiso(iso_mods1000, seq(0, 1, 0.001)), lwd = 4, type = 'l',  col = 'blue',
+     xaxt = 'n', xlab = '', yaxt = 'n', ylab = '', bty = 'n')
+lines(predict_bootiso(iso_mods1, seq(0, 1, 0.001)), lwd = 4, type = 'l', col = 'red')
+```
+
 
 # Extensions to $k > 2$
 
@@ -254,4 +362,12 @@ trivial with $\Delta^{1}$ because we're only concerned with one unknown value an
 # Conclusion
 
 ## References
+
+- **[Multivariate calibration of classifier scores into the probability space](https://www.researchgate.net/publication/28358301_Multivariate_calibration_of_classifier_scores_into_the_probability_space)** by Martin Gebel
+
+- **[Transforming Classifier Scores into Accurate Multiclass Probability Estimates](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&cad=rja&uact=8&ved=0ahUKEwit7-7h9f7UAhVl6IMKHUPeB2oQFghDMAM&url=http%3A%2F%2Fwww.cs.cornell.edu%2Fcourses%2Fcs678%2F2007sp%2FZadroznyElkan.pdf&usg=AFQjCNEsN8dbe1yXCm7D7qkyrP6HZ6yOxg)** by Zadrozny and Elkan
+
+- **[Obtaining Calibrated Probabilities from Boosting](http://www.cs.cornell.edu/~caruana/niculescu.scldbst.crc.rev4.pdf)** by Niculescu-Mizil and Caruana
+
+- **[Predicting Good Probabilities With Supervised Learning](https://www.google.com/url?url=http://scholar.google.com/scholar_url%3Furl%3Dhttp://machinelearning.wustl.edu/mlpapers/paper_files/icml2005_Niculescu-MizilC05.pdf%26hl%3Den%26sa%3DX%26scisig%3DAAGBfm1wOIFZHQSONJ4oLiHQyqALiSVCng%26nossl%3D1%26oi%3Dscholarr&rct=j&q=&esrc=s&sa=X&ved=0ahUKEwiOotzS9v7UAhXr8YMKHZI8CGsQgAMIJygAMAA&usg=AFQjCNG3rc7DzDTTox-DD_xm9hwrC5VVQA)** by Niculescu-Mizil and Caruana
 
